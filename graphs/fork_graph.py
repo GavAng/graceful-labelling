@@ -1,19 +1,27 @@
-from collections.abc import Sequence
+from itertools import chain
 import math
-from typing import TypeVar, override
+from typing import TypeVar, TypedDict, override
 
-from .base_graph import BaseGraph
+from .directed_graph import DirectedGraph
 from .path_graph import PathGraph
 from .utils import Edge, Position, Vertex
 
 T = TypeVar("T")
 
 
-class ForkGraph(BaseGraph):
-    @override
-    def __init__(self, path: Sequence[Edge], ends: tuple[Edge, Edge]):
-        super().__init__(list(path) + list(ends))
-        self.path = PathGraph(path)
+class ForkGraphArgs(TypedDict):
+    path: PathGraph
+    ends: tuple[Edge, Edge]
+
+
+class ForkGraph(DirectedGraph):
+    def __init__(self, path: PathGraph, ends: tuple[Edge, Edge]):
+        super().from_edges(chain(path.edges, ends))
+        ends_common = set(ends[0]) & set(ends[1])
+        connector = next(iter(ends_common))
+        if path.vertices[0] == connector:
+            path = PathGraph(list(reversed(path.vertices)), path.edges)
+        self.path = path
         self.ends = ends
 
     @property
@@ -29,3 +37,6 @@ class ForkGraph(BaseGraph):
             y = (-1) ** i * (1 / math.sqrt(2))
             layout[endpoint] = (x, y)
         return layout
+
+    def draw(self):
+        super().draw(figsize=(self.n_vertices, 2))

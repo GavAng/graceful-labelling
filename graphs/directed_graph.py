@@ -1,18 +1,29 @@
-from abc import ABC
-from collections.abc import Collection
+from collections.abc import Iterable
+from itertools import chain
 import matplotlib.pyplot as plt
 import networkx as nx
 from typing import TypeVar
 
-from .utils import Edge, Vertex
+from .utils import Edge, Position, Vertex
 
 T = TypeVar("T")
 
 
-class BaseGraph(ABC):
-    def __init__(self, edges: Collection[Edge]) -> None:
-        graph = nx.DiGraph(edges)
+class DirectedGraph:
+    def __init__(self, vertices: Iterable[Vertex], edges: Iterable[Edge]) -> None:
+        edge_vertices = chain.from_iterable(edges)
+        if not set(edge_vertices).issubset(vertices):
+            raise ValueError("An edge contains an endpoint not in the vertex set.")
+
+        graph = nx.DiGraph()
+        graph.add_nodes_from(vertices)
+        graph.add_edges_from(edges)
         self._graph = graph
+
+    @classmethod
+    def from_edges(cls, edges: Iterable[Edge]):
+        vertices = set(chain.from_iterable(edges))
+        return DirectedGraph(vertices, edges)
 
     @classmethod
     def from_graph(cls, graph: nx.Graph):
@@ -20,7 +31,7 @@ class BaseGraph(ABC):
         Converts an undirected NetworkX Graph G to a DiGraph D under the orientation (i, j) in V(D)
         if and only if {i, j} in V(G) and i < j.
         """
-        return cls(graph.edges)
+        return DirectedGraph.from_edges(graph.edges)
 
     @property
     def edge_labels(self) -> dict[Edge, int]:
@@ -32,6 +43,10 @@ class BaseGraph(ABC):
     @property
     def vertices(self) -> list[Vertex]:
         return list(self._graph.nodes)
+
+    @property
+    def n_vertices(self) -> int:
+        return len(self.vertices)
 
     @property
     def edges(self) -> list[Edge]:
@@ -64,20 +79,28 @@ class BaseGraph(ABC):
         return False
 
     @property
-    def layout(self):
-        return nx.spring_layout(self._graph)
+    def layout(self) -> dict[Vertex, Position] | None:
+        return None
 
-    def draw(self) -> None:
+    def draw(self, *, figsize: tuple[float, float] | None = None) -> None:
+        if self.layout is None:
+            layout = nx.spring_layout(self._graph)
+        else:
+            layout = self.layout
+        if figsize is not None:
+            plt.figure(figsize=figsize)
+
         nx.draw(
             self._graph,
-            pos=self.layout,
+            pos=layout,
             with_labels=True,
             node_color="lightblue",
         )
         nx.draw_networkx_edge_labels(
             self._graph,
-            pos=self.layout,
+            pos=layout,
             edge_labels=self.edge_labels,
         )
+
         plt.axis("equal")
         plt.show()

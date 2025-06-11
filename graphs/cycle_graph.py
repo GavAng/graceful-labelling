@@ -4,12 +4,12 @@ from typing import TypeVar, override
 
 from .utils import Vertex
 
-from .base_graph import BaseGraph
+from .directed_graph import DirectedGraph
 
 T = TypeVar("T")
 
 
-class CycleGraph(BaseGraph):
+class CycleGraph(DirectedGraph):
     @classmethod
     def from_vertices(cls, vertices: Sequence[Vertex]):
         """
