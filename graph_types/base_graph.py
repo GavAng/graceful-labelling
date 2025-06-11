@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from typing import TypeVar
 
-from .utils import Edge
+from .utils import Edge, Vertex
 
 T = TypeVar("T")
 
@@ -30,7 +30,7 @@ class BaseGraph(ABC):
         return (edge[1] - edge[0]) % (self.n_edges + 1)
 
     @property
-    def vertices(self) -> list[int]:
+    def vertices(self) -> list[Vertex]:
         return list(self._graph.nodes)
 
     @property
@@ -41,21 +41,43 @@ class BaseGraph(ABC):
     def n_edges(self) -> int:
         return len(self.edges)
 
-    def get_layout(self):
+    def add_edge(self, edge: Edge) -> None:
+        u, v = edge
+        self._graph.add_edge(u, v)
+
+    def get_degree(self, vertex: Vertex) -> int:
+        return self._graph.degree[vertex]
+
+    def get_other_endpoint(self, edge: Edge, vertex: Vertex) -> Vertex:
+        if vertex in edge:
+            return edge[(edge.index(vertex) + 1) % 2]
+        raise ValueError("Given edge does not contain given vertex.")
+
+    def contains_edge(self, edge: Edge, directed: bool = True) -> bool:
+        if directed:
+            return edge in self.edges
+        return edge in self.edges or tuple(reversed(edge)) in self.edges
+
+    def __contains__(self, other: object) -> bool:
+        if isinstance(other, int):
+            return other in self._graph
+        return False
+
+    @property
+    def layout(self):
         return nx.spring_layout(self._graph)
 
-    def draw(self, layout=None, seed: int | None = None) -> None:
-        if layout is None:
-            layout = self.get_layout()
+    def draw(self) -> None:
         nx.draw(
             self._graph,
-            pos=layout,
+            pos=self.layout,
             with_labels=True,
             node_color="lightblue",
         )
         nx.draw_networkx_edge_labels(
             self._graph,
-            pos=layout,
+            pos=self.layout,
             edge_labels=self.edge_labels,
         )
+        plt.axis("equal")
         plt.show()
