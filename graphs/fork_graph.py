@@ -1,28 +1,40 @@
-from itertools import chain
+from collections.abc import Collection, Iterable, Sequence
+from itertools import pairwise
 import math
-from typing import TypeVar, TypedDict, override
+from typing import Self, override
 
 from .directed_graph import DirectedGraph
 from .path_graph import PathGraph
 from .utils import Edge, Position, Vertex
 
-T = TypeVar("T")
-
-
-class ForkGraphArgs(TypedDict):
-    path: PathGraph
-    ends: tuple[Edge, Edge]
-
 
 class ForkGraph(DirectedGraph):
-    def __init__(self, path: PathGraph, ends: tuple[Edge, Edge]):
-        super().from_edges(chain(path.edges, ends))
-        ends_common = set(ends[0]) & set(ends[1])
-        connector = next(iter(ends_common))
-        if path.vertices[0] == connector:
-            path = PathGraph(list(reversed(path.vertices)), path.edges)
-        self.path = path
-        self.ends = ends
+    def __init__(self, vertices: Iterable[Vertex], edges: Collection[Edge]):
+        super().__init__(vertices, edges)
+        *path_vertices, end_vertex_1, end_vertex_2 = vertices
+        *path_edges, _, _ = edges
+
+        self.path = PathGraph(path_vertices, path_edges)
+        self.ends = (end_vertex_1, end_vertex_2)
+
+    @classmethod
+    @override
+    def from_vertices(cls, vertices: Sequence[Vertex]) -> Self:
+        *path_vertices, end_vertex_1, end_vertex_2 = vertices
+        connector = path_vertices[-1]
+        end_edge_1 = (connector, end_vertex_1)
+        end_edge_2 = (connector, end_vertex_2)
+        edges = [
+            (i, j) if i < j else (j, i)
+            for i, j in list(pairwise(path_vertices)) + [end_edge_1, end_edge_2]
+        ]
+        return cls(vertices, edges)
+
+    @classmethod
+    def from_path_vertices(
+        cls, path: Sequence[Vertex], ends: tuple[Vertex, Vertex]
+    ) -> Self:
+        return cls.from_vertices(list(path) + list(ends))
 
     @property
     @override
@@ -30,12 +42,10 @@ class ForkGraph(DirectedGraph):
         layout: dict[Vertex, Position] = {
             vertex: (i, 0) for i, vertex in enumerate(self.path.vertices)
         }
-        connector = self.path.vertices[-1]
-        for i, edge in enumerate(self.ends):
-            endpoint = self.get_other_endpoint(edge, connector)
+        for i, end in enumerate(self.ends):
             x = len(self.path.vertices) - 1 + (1 / math.sqrt(2))
             y = (-1) ** i * (1 / math.sqrt(2))
-            layout[endpoint] = (x, y)
+            layout[end] = (x, y)
         return layout
 
     def draw(self):

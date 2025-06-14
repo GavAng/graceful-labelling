@@ -1,16 +1,15 @@
-from collections.abc import Iterable
+from abc import ABC, abstractmethod
+from collections.abc import Collection, Iterable, Sequence
 from itertools import chain
+from typing import Self
 import matplotlib.pyplot as plt
 import networkx as nx
-from typing import TypeVar
 
 from .utils import Edge, Position, Vertex
 
-T = TypeVar("T")
 
-
-class DirectedGraph:
-    def __init__(self, vertices: Iterable[Vertex], edges: Iterable[Edge]) -> None:
+class DirectedGraph(ABC):
+    def __init__(self, vertices: Iterable[Vertex], edges: Collection[Edge]):
         edge_vertices = chain.from_iterable(edges)
         if not set(edge_vertices).issubset(vertices):
             raise ValueError("An edge contains an endpoint not in the vertex set.")
@@ -21,17 +20,25 @@ class DirectedGraph:
         self._graph = graph
 
     @classmethod
-    def from_edges(cls, edges: Iterable[Edge]):
-        vertices = set(chain.from_iterable(edges))
-        return DirectedGraph(vertices, edges)
+    @abstractmethod
+    def from_vertices(cls, vertices: Sequence[Vertex]) -> Self: ...
 
     @classmethod
-    def from_graph(cls, graph: nx.Graph):
+    def from_int(cls, n_vertices: int) -> Self:
+        return cls.from_vertices(range(n_vertices))
+
+    @classmethod
+    def from_edges(cls, edges: Collection[Edge]) -> Self:
+        vertices = set(chain.from_iterable(edges))
+        return cls(vertices, edges)
+
+    @classmethod
+    def from_graph(cls, graph: nx.Graph) -> Self:
         """
         Converts an undirected NetworkX Graph G to a DiGraph D under the orientation (i, j) in V(D)
         if and only if {i, j} in V(G) and i < j.
         """
-        return DirectedGraph.from_edges(graph.edges)
+        return cls.from_edges(graph.edges)
 
     @property
     def edge_labels(self) -> dict[Edge, int]:

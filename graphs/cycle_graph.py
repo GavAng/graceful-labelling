@@ -1,32 +1,38 @@
 from collections.abc import Sequence
+from itertools import pairwise
 import networkx as nx
-from typing import TypeVar, override
+from typing import Self, override
 
 from .utils import Vertex
 
 from .directed_graph import DirectedGraph
 
-T = TypeVar("T")
-
 
 class CycleGraph(DirectedGraph):
     @classmethod
-    def from_vertices(cls, vertices: Sequence[Vertex]):
+    def from_vertices(
+        cls, vertices: Sequence[Vertex], *, directed: bool = False
+    ) -> Self:
         """
-        Creates a directed cycle graph of len(vertices) nodes with vertex labels in order round the circle
-        vertices[0], vertex[1], ..., vertex[-1].
+        if directed:
+        else:
         """
-        return cls.from_graph(nx.cycle_graph(vertices))
+        edges = pairwise(list(vertices) + [vertices[0]])
+        if directed:
+            return cls(vertices, list(edges))
+        edges = [(i, j) if i < j else (j, i) for i, j in edges]
+        return cls(vertices, edges)
 
     @classmethod
-    def from_int(cls, n_nodes: int):
-        """
-        Creates a directed cycle graph of n_nodes nodes with vertex labels in order round the circle
-        0, 1, ..., n_nodes-1.
-        """
-        return cls.from_vertices(range(n_nodes))
+    @override
+    def from_int(cls, n_vertices: int) -> Self:
+        return cls.from_vertices(range(n_vertices), directed=True)
 
     @property
     @override
     def layout(self):
         return nx.circular_layout(self._graph)
+
+    def draw(self):
+        pi = 3
+        super().draw(figsize=((self.n_vertices / pi) + 1, (self.n_vertices / pi) + 1))
