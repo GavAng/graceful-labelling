@@ -49,11 +49,15 @@ def find_alpha_valuations(graph: nx.Graph) -> Generator[nx.Graph, None, None]:
     # every alpha valuation is a graceful labelling (by definition)
     for graceful_graph in find_graceful_labellings(graph):
         vertex_labels = nx.get_node_attributes(graceful_graph, "label")
-        edge_labels = nx.get_edge_attributes(graceful_graph, "label")
+        labels_to_edges = {
+            label: edge
+            for edge, label in nx.get_edge_attributes(graceful_graph, "label").items()
+        }
         # existence and uniqueness means we can do this:
-        u, v = list(filter(lambda edge: edge_labels[edge] == 1, edge_labels))[0]
+        u, v = labels_to_edges[1]
         # x as defined in the definition of alpha valuations:
         x = min(vertex_labels[u], vertex_labels[v])
+
         is_alpha_valuation = True
         for u, v in graph.edges:
             if (vertex_labels[u] <= x and vertex_labels[v] <= x) or (
@@ -62,4 +66,28 @@ def find_alpha_valuations(graph: nx.Graph) -> Generator[nx.Graph, None, None]:
                 is_alpha_valuation = False
                 break
         if is_alpha_valuation:
+            yield graceful_graph
+
+
+def find_eta_valuations(graph: nx.Graph) -> Generator[nx.Graph, None, None]:
+    n_edges = len(graph.edges)
+    # every eta valuation is a graceful labelling (by definition)
+    for graceful_graph in find_graceful_labellings(graph):
+        labels_to_edges = {
+            label: edge
+            for edge, label in nx.get_edge_attributes(graceful_graph, "label").items()
+        }
+
+        is_eta_valuation = True
+        for label, edge in labels_to_edges.items():
+            if label != 1 and set(edge) & set(labels_to_edges[label - 1]) == set():
+                is_eta_valuation = False
+                break
+            if (
+                label != n_edges
+                and set(edge) & set(labels_to_edges[label + 1]) == set()
+            ):
+                is_eta_valuation = False
+                break
+        if is_eta_valuation:
             yield graceful_graph

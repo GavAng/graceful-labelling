@@ -1,14 +1,25 @@
 from .directed_graph import DirectedGraph
-from .cycle_graph import CycleGraph
-from .fork_graph import ForkGraph
-from .path_graph import PathGraph
-from .from_edges import path, cycle
+from .directed_cycle_graph import DirectedCycleGraph
+from .directed_fork_graph import DirectedForkGraph
+from .directed_path_graph import DirectedPathGraph
+from .undirected_graphs import (
+    PathGraph,
+    CycleGraph,
+    CompleteGraph,
+    StarGraph,
+    SunGraph,
+    WheelGraph,
+)
 
 __all__ = [
     "DirectedGraph",
-    "CycleGraph",
-    "ForkGraph",
+    "DirectedCycleGraph",
+    "DirectedForkGraph",
+    "DirectedPathGraph",
     "PathGraph",
-    "path",
-    "cycle",
+    "CycleGraph",
+    "CompleteGraph",
+    "StarGraph",
+    "SunGraph",
+    "WheelGraph",
 ]

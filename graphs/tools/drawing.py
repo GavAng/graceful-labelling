@@ -69,14 +69,24 @@ def draw_slideshow(
 
         fig, ax = plt.subplots()
         ax = labelled_graph_to_axis(graph, ax=ax, layout=layout)
+        ax.set_aspect("equal")
+
+        xs, ys = zip(*layout.values())
+        x_pad = max((max(xs) - min(xs)) * 0.1, 0.5)
+        y_pad = max((max(ys) - min(ys)) * 0.1, 0.5)
+        ax.set_xlim(min(xs) - x_pad, max(xs) + x_pad)
+        ax.set_ylim(min(ys) - y_pad, max(ys) + y_pad)
 
         buf = io.BytesIO()
-        plt.savefig(buf, format="png", bbox_inches="tight")
+        plt.savefig(buf, format="png")
         plt.close(fig)
         buf.seek(0)
 
         img_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
         graph_drawings.append(img_base64)
+
+    if not graph_drawings:
+        raise StopIteration("Empty graph iterator given.")
 
     unique_id = f"slideshow_{uuid.uuid4().hex}"
 
