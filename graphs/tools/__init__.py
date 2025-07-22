@@ -1,6 +1,5 @@
-from .drawing import draw_labelled_graph, draw_slideshow
+from .drawing import draw_graphs
 
 __all__ = [
-    "draw_labelled_graph",
-    "draw_slideshow",
+    "draw_graphs",
 ]

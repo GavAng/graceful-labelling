@@ -41,7 +41,7 @@ def labelled_graph_to_axis(
     return ax
 
 
-def draw_labelled_graph(
+def draw_graph(
     graph: nx.Graph,
     *,
     layout: Mapping[Vertex, Position] | None = None,
@@ -123,3 +123,14 @@ def draw_slideshow(
     """
 
     display(HTML(html))
+
+
+def draw_graphs(
+    graphs: nx.Graph | Iterable[nx.Graph],
+    *,
+    layout: Mapping[Vertex, Position] | None = None,
+) -> None:
+    if isinstance(graphs, nx.Graph):
+        draw_graph(graphs, layout=layout)
+    else:
+        draw_slideshow(graphs, layout=layout)

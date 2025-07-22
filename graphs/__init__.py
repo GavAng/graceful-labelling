@@ -9,6 +9,7 @@ from .undirected_graphs import (
     StarGraph,
     SunGraph,
     WheelGraph,
+    UndirectedGraph,
 )
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "StarGraph",
     "SunGraph",
     "WheelGraph",
+    "UndirectedGraph",
 ]
