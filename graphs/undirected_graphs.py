@@ -99,9 +99,9 @@ class WheelGraph(UndirectedGraph):
     @override
     @staticmethod
     def edges(n_vertices: int) -> list[Edge]:
-        return CycleGraph.edges(n_vertices - 1) + StarGraph.edges(n_vertices - 1)
+        return StarGraph.edges(n_vertices) + CycleGraph.edges(n_vertices)
 
     @override
     @staticmethod
     def layout(n_vertices: Vertex) -> dict[Vertex, Position]:
-        return StarGraph.layout(n_vertices - 1)
+        return StarGraph.layout(n_vertices)

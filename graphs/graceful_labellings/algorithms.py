@@ -91,3 +91,18 @@ def find_eta_valuations(graph: nx.Graph) -> Generator[nx.Graph, None, None]:
                 break
         if is_eta_valuation:
             yield graceful_graph
+
+
+def find_pm_valuations(graph: nx.Graph) -> Generator[nx.Graph, None, None]:
+    for graceful_graph in find_graceful_labellings(graph):
+        is_pm_valuation = True
+        vertex_labels = nx.get_node_attributes(graceful_graph, "label")
+        for vertex, label in vertex_labels.items():
+            neighbors = list(graceful_graph.neighbors(vertex))
+            if any(vertex_labels[neighbor] < label for neighbor in neighbors) and any(
+                vertex_labels[neighbor] > label for neighbor in neighbors
+            ):
+                is_pm_valuation = False
+                break
+        if is_pm_valuation:
+            yield graceful_graph
