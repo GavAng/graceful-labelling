@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from itertools import pairwise
 import networkx as nx
-from typing import Self, override
+from typing import Self
 
 from .utils import Vertex
 
@@ -24,12 +24,10 @@ class DirectedCycleGraph(DirectedGraph):
         return cls(vertices, edges)
 
     @classmethod
-    @override
     def from_int(cls, n_vertices: int) -> Self:
         return cls.from_vertices(range(n_vertices), directed=True)
 
     @property
-    @override
     def layout(self):
         return nx.circular_layout(self._graph)
 
