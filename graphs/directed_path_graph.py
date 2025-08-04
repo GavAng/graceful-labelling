@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 from itertools import pairwise
-from typing import Self, override
+from typing import Self
 
 from .directed_graph import DirectedGraph
 from .utils import Position, Vertex
@@ -8,7 +8,6 @@ from .utils import Position, Vertex
 
 class DirectedPathGraph(DirectedGraph):
     @classmethod
-    @override
     def from_vertices(
         cls, vertices: Sequence[Vertex], *, directed: bool = False
     ) -> Self:
@@ -28,7 +27,6 @@ class DirectedPathGraph(DirectedGraph):
         return cls(vertices, edges)
 
     @property
-    @override
     def layout(self) -> dict[Vertex, Position]:
         return {vertex: (i, 0) for i, vertex in enumerate(self.vertices)}
 
