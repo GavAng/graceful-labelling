@@ -23,4 +23,4 @@ Stores the graphs and their logic. Unlike the other two packages, we actually ne
 
 ## Codebase
 
-I have created an in-depth and interactive exploration of the codebase in `tutorial.ipynb`. As long as you have the above packages installed in your environment the jupyter notebook should run with no issues.
+I have created an in-depth and interactive exploration of the codebase in `tutorial.ipynb` - as long as you have the above packages installed in your environment the jupyter notebook should run with no issues. Note that while the tutorial does not explain the mathematics taking place there is still lots to get out of the visualisations and simplicity of the code.
